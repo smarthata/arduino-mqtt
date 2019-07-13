@@ -22,8 +22,8 @@ typedef struct {
 
 class MQTTClient;
 
-typedef void (*MQTTClientCallbackSimple)(String &topic, String &payload);
-typedef void (*MQTTClientCallbackAdvanced)(MQTTClient *client, char topic[], char bytes[], int length);
+typedef std::function<void (String &topic, String &payload)> MQTTClientCallbackSimple;
+typedef std::function<void (MQTTClient *client, char topic[], char bytes[], int length)> MQTTClientCallbackAdvanced;
 
 typedef struct {
   MQTTClient *client = nullptr;
