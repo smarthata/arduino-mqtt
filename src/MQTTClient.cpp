@@ -122,6 +122,17 @@ void MQTTClient::begin(const char hostname[], int port, Client &client) {
   // set hostname and port
   this->setHost(hostname, port);
 
+    this->begin(client);
+}
+
+void MQTTClient::begin(IPAddress &ip, int port, Client &client) {
+    // set ip_address and port
+    this->setIPAddress(ip, port);
+
+    this->begin(client);
+}
+
+void MQTTClient::begin(Client &client) {
   // set client
   this->netClient = &client;
 
@@ -166,6 +177,16 @@ void MQTTClient::setHost(const char hostname[], int port) {
   // set hostname and port
   this->hostname = strdup(hostname);
   this->port = port;
+}
+
+void MQTTClient::setIPAddress(IPAddress &ip, int port) {
+    // free ip_address if set
+    if (this->ip_address != nullptr) {
+        free((void *) this->ip_address);
+    }
+    // set ip_address and port
+    this->ip_address = new IPAddress(ip);
+    this->port = port;
 }
 
 void MQTTClient::setWill(const char topic[], const char payload[], bool retained, int qos) {
@@ -258,10 +279,15 @@ bool MQTTClient::connect(const char clientId[], const char username[], const cha
 
   // connect to host
   if (!skip) {
-    int ret = this->netClient->connect(this->hostname, (uint16_t)this->port);
-    if (ret <= 0) {
-      return false;
-    }
+      int ret;
+      if (this->ip_address != nullptr) {
+          ret = this->netClient->connect(*this->ip_address, (uint16_t) this->port);
+      } else {
+          ret = this->netClient->connect(this->hostname, (uint16_t) this->port);
+      }
+      if (ret <= 0) {
+          return false;
+      }
   }
 
   // prepare options
